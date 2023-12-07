@@ -1,4 +1,3 @@
-import rospy
 from iss_msgs.msg import State
 import numpy as np
 
@@ -6,15 +5,16 @@ from planning_utils.angle import zero_2_2pi
 
 
 class GTStateEstimator:
-    def __init__(self, vehicle) -> None:
+    def __init__(self, node, vehicle) -> None:
+        self._node = node
         self._vehicle = vehicle
-        self._state_estimation_pub = rospy.Publisher("carla_bridge/gt_state", State, queue_size=1)
-        gt_state_estimation_frequency = rospy.get_param('~gt_state_estimation_frequency', 10)
-        self._timer = rospy.Timer(rospy.Duration(1 / gt_state_estimation_frequency), self._timer_callback)
+        self._state_estimation_pub = self._node.create_publisher(State, "carla_bridge/gt_state", queue_size=1)
+        gt_state_estimation_frequency = self._node.declare_parameter('~gt_state_estimation_frequency', 10).value
+        self._timer = self._node.create_timer(1 / gt_state_estimation_frequency, self._timer_callback)
     
     def _timer_callback(self, event):
         state = State()
-        state.header.stamp = rospy.Time.now()
+        state.header.stamp = self._node.get_clock().now()
         state.header.frame_id = "map"
         state.name = "ego_vehicle"
         carla_transform = self._vehicle.get_transform()

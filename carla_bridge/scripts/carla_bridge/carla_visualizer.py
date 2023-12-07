@@ -1,5 +1,4 @@
 import carla
-import rospy
 
 from iss_msgs.msg import StateArray, State
 
@@ -11,13 +10,14 @@ color_map = {
 }
 
 class CARLAVisualizer:
-    def __init__(self, world) -> None:
+    def __init__(self, node, world) -> None:
+        self._node = node
         self._world = world
-        self._global_planner_sub = rospy.Subscriber("planning/global_planner/trajectory", StateArray, self._global_planner_callback)
-        self._local_planner_sub = rospy.Subscriber("planning/local_planner/trajectory", StateArray, self._local_planner_callback)
+        self._global_planner_sub = self._node.get_subscriber(StateArray, "planning/global_planner/trajectory", self._global_planner_callback)
+        self._local_planner_sub = self._node.get_subscriber(StateArray, "planning/local_planner/trajectory", self._local_planner_callback)
     
     def _global_planner_callback(self, msg):
-        life_time = rospy.get_param('~simulation_duration')
+        life_time = self._node.get_parameter('~simulation_duration').get_value()
         self._draw_trajectory_carla(msg, life_time=life_time, z=0.5, color=color_map['green'])
     
     def _local_planner_callback(self, msg):

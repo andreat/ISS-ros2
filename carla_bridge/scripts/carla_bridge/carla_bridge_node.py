@@ -6,7 +6,9 @@ import numpy as np
 import random
 from scipy.spatial.transform import Rotation as R
 
-import rospy
+import rclpy
+from rclpy.node import Node
+
 from tqdm import tqdm
 
 from carla_bridge.gt_object_detector import GTObjectDetector
@@ -16,21 +18,30 @@ from carla_bridge.controller_bridge import ControllerBridge
 
 from iss_msgs.msg import ControlCommand
 
-class CARLABridgeNode:
+class CARLABridgeNode(Node):
     def __init__(self, world, traffic_manager):
+        super().__init__("carla_bridge_node")
+
+        carla_host = self.declare_parameter('~carla_host', 'localhost').value
+        carla_port = self.declare_parameter('~carla_port', 2000).value
+        client = carla.Client(carla_host, carla_port)
+        client.set_timeout(5.0)
+        map_name = self.declare_parameter('~map_name', 'Town06').value
+        client.load_world(map_name)
+
         self.params =  {
-            "fixed_delta_seconds": rospy.get_param('~fixed_delta_seconds'),
-            "num_non_ego_vehicles": rospy.get_param('~num_non_ego_vehicles'),
-            "graphic_rendering": rospy.get_param('~graphic_rendering'),
-            "simulation_duration": rospy.get_param('~simulation_duration'),
-            "simple_agent_demo": rospy.get_param('~simple_agent_demo'),
-            "ego_init": rospy.get_param('~ego_init'),
-            "ego_destination": rospy.get_param('~ego_destination'),
-            "agent_control_frequency": rospy.get_param('~agent_control_frequency'),
+            "fixed_delta_seconds": self.get_parameter('~fixed_delta_seconds'),
+            "num_non_ego_vehicles": self.get_parameter('~num_non_ego_vehicles'),
+            "graphic_rendering": self.get_parameter('~graphic_rendering'),
+            "simulation_duration": self.get_parameter('~simulation_duration'),
+            "simple_agent_demo": self.get_parameter('~simple_agent_demo'),
+            "ego_init": self.get_parameter('~ego_init'),
+            "ego_destination": self.get_parameter('~ego_destination'),
+            "agent_control_frequency": self.get_parameter('~agent_control_frequency'),
         }
-        self._world = world
+        self._world = client.get_world()
         self._original_settings = self._world.get_settings()
-        self._traffic_manager = traffic_manager
+        self._traffic_manager = client.get_trafficmanager()
         self._traffic_manager_port = self._traffic_manager.get_port()
         self._traffic_manager.set_random_device_seed(42)
         settings = self._world.get_settings()
@@ -48,10 +59,10 @@ class CARLABridgeNode:
         
 
     def run(self):
-        self._gt_object_detector = GTObjectDetector(self._vehicles["ego_vehicle"].id, self._world)
-        self._gt_state_estimator = GTStateEstimator(self._vehicles["ego_vehicle"])
-        self._controller_bridge = ControllerBridge(self._vehicles["ego_vehicle"])
-        self._carla_timer = rospy.Timer(rospy.Duration(self.params["fixed_delta_seconds"]), self._carla_tick)
+        self._gt_object_detector = GTObjectDetector(self, self._vehicles["ego_vehicle"].id, self._world)
+        self._gt_state_estimator = GTStateEstimator(self, self._vehicles["ego_vehicle"])
+        self._controller_bridge = ControllerBridge(self, self._vehicles["ego_vehicle"])
+        self._carla_timer = self.create_timer(self.params["fixed_delta_seconds"], self._carla_tick)
         self._total_steps = int(self.params["simulation_duration"] / self.params["fixed_delta_seconds"])
         # self._progress_bar = tqdm(total=self.params["simulation_duration"] + 0.1, unit="sec")
         self._step_cnt = 0
@@ -78,7 +89,7 @@ class CARLABridgeNode:
             # self._progress_bar.close()
             self.destory()
             self._world.tick()
-            rospy.signal_shutdown("Simulation finished!")
+            rclpy.shutdown("Simulation finished!")
             
     def _add_ego_vehicle(self, spawn_point):
         blueprint_library = self._world.get_blueprint_library()
@@ -132,12 +143,6 @@ class CARLABridgeNode:
             
 
 if __name__ == "__main__":
-    rospy.init_node("carla_bridge_node")
-    carla_host = rospy.get_param('~carla_host', 'localhost')
-    carla_port = rospy.get_param('~carla_port', 2000)
-    client = carla.Client(carla_host, carla_port)
-    client.set_timeout(5.0)
-    map_name = rospy.get_param('~map_name', 'Town06')
-    client.load_world(map_name)
-    simulator = CARLABridgeNode(client.get_world(), client.get_trafficmanager())
+    rclpy.init()
+    simulator = CARLABridgeNode()
     simulator.run()

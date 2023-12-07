@@ -1,4 +1,3 @@
-import rospy
 import numpy as np
 
 import tf.transformations
@@ -8,12 +7,13 @@ from planning_utils.angle import zero_2_2pi
 
 
 class GTObjectDetector:
-    def __init__(self, vehicle_id, world) -> None:
+    def __init__(self, node, vehicle_id, world) -> None:
+        self._node = node
         self._vehicle_id = vehicle_id
         self._world = world
-        gt_object_detection_frequency = rospy.get_param('~gt_object_detection_frequency', 10)
-        self._timer = rospy.Timer(rospy.Duration(1 / gt_object_detection_frequency), self._timer_callback)
-        self._object_detection_pub = rospy.Publisher("carla_bridge/gt_object_detection", ObjectDetection3DArray, queue_size=1)
+        gt_object_detection_frequency = self._node.declare_parameter('~gt_object_detection_frequency', 10).value
+        self._timer = self._node.create_timer(1 / gt_object_detection_frequency, self._timer_callback)
+        self._object_detection_pub = self._node.create_publisher(ObjectDetection3DArray, "carla_bridge/gt_object_detection", queue_size=1)
         self._MAX_DISTANCE = 20
         
     def _timer_callback(self, event):
@@ -25,7 +25,7 @@ class GTObjectDetector:
             if actor.get_location().distance(ego_location) > self._MAX_DISTANCE:
                 continue
             detection = ObjectDetection3D()
-            detection.header.stamp = rospy.Time.now()
+            detection.header.stamp = self._node.get_clock().now()
             detection.header.frame_id = "map"
             detection.id = actor.id
             detection.score = 1.0
