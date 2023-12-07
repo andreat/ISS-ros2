@@ -2,7 +2,6 @@ import math
 import numpy as np
 import cvxpy as cp
 import bisect
-import rospy
 from scipy.interpolate import interp1d
 
 from planning_utils.trajectory import Trajectory
@@ -27,11 +26,13 @@ def bicycle_model_step(bicycle_model_state, acc, steer, L, dt):
     return bicycle_model_state
 
 class VehicleLinearMPCController:
-    def __init__(self, settings) -> None:
+    def __init__(self, settings, logger) -> None:
+        self._logger = logger
+        
         self._acc_table = settings['acc_table']
         self._nx = settings['nx'] # state vector: z = [x, y, yaw, v]
         self._nu = settings['nu'] # input vector: u = [acceleration, steering]
-        
+
         self._N = settings['N']
         self._dt = settings['dt']
         self._steering_rate_max = settings['steer_rate_max']
@@ -133,7 +134,7 @@ class VehicleLinearMPCController:
             # print("mpc control: ")
             # print(u_opt.value.T)
         else:
-            rospy.logwarn("Control: Failed")
+            self._logger.warning("Control: Failed")
             
 
     

@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 
+import rclpy
+from rclpy.node import Node
+
 from wpt_tracker.pid_wpt_tracker import VehiclePIDController
 from wpt_tracker.linear_mpc_tracker import VehicleLinearMPCController
 from iss_msgs.msg import ControlCommand, StateArray, State
 from planning_utils.trajectory import Trajectory
-import rospy
 import numpy as np
 
-class WPTTrackerNode:
+class WPTTrackerNode(Node):
     def __init__(self) -> None:
-        ctrl_freq = rospy.get_param("~control_frequency", 10)
-        self._timer = rospy.Timer(rospy.Duration(1 / ctrl_freq), self._timer_callback)
-        self._ctrl_pub = rospy.Publisher("control/wpt_tracker/control_command", ControlCommand, queue_size=1)
-        self._ego_state_sub = rospy.Subscriber("carla_bridge/gt_state", State, self._state_callback)
-        self._trajectory_sub = rospy.Subscriber("planning/local_planner/trajectory", StateArray, self._trajectory_callback)
+        super().__init__("wpt_tracker_node")
+        ctrl_freq = self.declare_parameter("~control_frequency", 10).value
+        self._timer = self.create_timer(1 / ctrl_freq, self._timer_callback)
+        self._ctrl_pub = self.create_publisher(ControlCommand, "control/wpt_tracker/control_command", queue_size=1)
+        self._ego_state_sub = self.create_subscription(State, "carla_bridge/gt_state", self._state_callback)
+        self._trajectory_sub = self.create_subscription(StateArray, "planning/local_planner/trajectory", self._trajectory_callback)
         self._ego_state = None
         
         # self._pid_tracker = VehiclePIDController()
@@ -36,7 +39,7 @@ class WPTTrackerNode:
             "Rd": np.diag([0.1, 1])
         }
         self._pid_tracker = VehiclePIDController()
-        self._mpc_tracker = VehicleLinearMPCController(linear_mpc_settings)
+        self._mpc_tracker = VehicleLinearMPCController(linear_mpc_settings, self.get_logger())
         self._trajectory = Trajectory()
         
     def _timer_callback(self, event):
@@ -56,6 +59,6 @@ class WPTTrackerNode:
         
 
 if __name__ == "__main__":
-    rospy.init_node("wpt_tracker_node")
+    rclpy.init()
     wpt_tracker_node = WPTTrackerNode()
-    rospy.spin()
+    rclpy.spin(wpt_tracker_node)
