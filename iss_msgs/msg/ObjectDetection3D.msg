@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 
 int64 id
 float64 score

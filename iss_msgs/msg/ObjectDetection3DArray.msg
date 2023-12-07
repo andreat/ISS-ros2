@@ -1,3 +1,3 @@
-Header header
+std_msgs/Header header
 
 iss_msgs/ObjectDetection3D[] detections
