@@ -2,6 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -23,7 +24,8 @@ from iss_msgs.srv import SetGoal
 class PlanningManagerNode(Node):
     def __init__(self) -> None:
         super().__init__("planning_manager_node")
-        self._ego_state_sub = self.create_subscription(State, "carla_bridge/gt_state", self._ego_state_callback, 100)
+        latching_qos = QoSProfile(depth=1, durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
+        self._ego_state_sub = self.create_subscription(State, "carla_bridge/gt_state", self._ego_state_callback, qos_profile=latching_qos)
         self._obstacle_sub = self.create_subscription(ObjectDetection3DArray, "carla_bridge/gt_object_detection", self._obstacle_callback, 100)
         self._ego_state = None
         
