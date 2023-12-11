@@ -1,13 +1,13 @@
 import os
 from glob import glob
-from setuptools import setup, find_packages
+from setuptools import setup
 
 package_name = 'planning'
 
 setup(
     name=package_name,
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=['global_planner', 'local_planner', 'motion_predictor', 'planning', 'planning_utils'],
     package_dir={'': 'scripts'},
     install_requires=['setuptools'],
     data_files=[
