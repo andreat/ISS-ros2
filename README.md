@@ -34,5 +34,5 @@ ros2 run carla_bridge carla_bridge.launch simple_agent_demo:=true
 ``` 
 - Try ISS agent ((in a new terminal)):
 ```
-ros2 run planning planning.launch
+ros2 launch planning planning.launch
 ```
