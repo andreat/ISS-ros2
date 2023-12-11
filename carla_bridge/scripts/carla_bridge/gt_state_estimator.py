@@ -12,7 +12,7 @@ class GTStateEstimator:
         gt_state_estimation_frequency = self._node.declare_parameter('~gt_state_estimation_frequency', 10).value
         self._timer = self._node.create_timer(1 / gt_state_estimation_frequency, self._timer_callback)
     
-    def _timer_callback(self, event):
+    def _timer_callback(self):
         state = State()
         state.header.stamp = self._node.get_clock().now()
         state.header.frame_id = "map"

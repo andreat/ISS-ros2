@@ -36,7 +36,7 @@ class GTObjectDetector:
         self._object_detection_pub = self._node.create_publisher(ObjectDetection3DArray, "carla_bridge/gt_object_detection", 1)
         self._MAX_DISTANCE = 20
         
-    def _timer_callback(self, event):
+    def _timer_callback(self):
         ego_location = self._world.get_actor(self._vehicle_id).get_location()
         all_detections = ObjectDetection3DArray()
         for actor in self._world.get_actors().filter('vehicle.*'):

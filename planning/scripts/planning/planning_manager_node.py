@@ -99,7 +99,7 @@ class PlanningManagerNode(Node):
     def _obstacle_callback(self, obstacle_msg):
         self._motion_predictor.update(obstacle_msg)    
 
-    def _local_planning_timer_callback(self, event):
+    def _local_planning_timer_callback(self):
         local_traj = self._lattice_planner.run_step(self._ego_state, self._motion_predictor)
         if local_traj.is_empty():
             self.get_logger().warning("Local planning: Failed")
