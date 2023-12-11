@@ -42,7 +42,7 @@ class WPTTrackerNode(Node):
         self._mpc_tracker = VehicleLinearMPCController(linear_mpc_settings, self.get_logger())
         self._trajectory = Trajectory()
         
-    def _timer_callback(self, event):
+    def _timer_callback(self):
         if self._ego_state is None:
             return
         throttle, steering = self._pid_tracker.run_step(self._ego_state)

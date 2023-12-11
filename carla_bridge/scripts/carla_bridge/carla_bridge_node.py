@@ -75,7 +75,7 @@ class CARLABridgeNode(Node):
         rclpy.spin(self)
     
         
-    def _carla_tick(self, event):
+    def _carla_tick(self):
         # self._progress_bar.update(self.params["fixed_delta_seconds"])
         self._step_cnt += 1
         self._set_spectator(self._vehicles["ego_vehicle"].get_transform())
