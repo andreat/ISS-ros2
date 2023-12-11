@@ -72,7 +72,7 @@ class CARLABridgeNode(Node):
         else:
             self._controller_bridge.start_iss_agent(self._spawn_points[self.params["ego_destination"]])
             self._carla_visualizer = CARLAVisualizer(self._world)
-        rospy.spin()
+        rclpy.spin(self)
     
         
     def _carla_tick(self, event):
