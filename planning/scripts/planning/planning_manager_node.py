@@ -77,21 +77,23 @@ class PlanningManagerNode(Node):
         self._local_planner_pub = self.create_publisher(StateArray, "planning/lattice_planner/trajectory", 1)
         self._set_goal_srv = self.create_service(SetGoal, "planning/set_goal", self._set_goal_srv_callback)
     
-    def _set_goal_srv_callback(self, req):
+    def _set_goal_srv_callback(self, request, response):
         while self._ego_state == None:
             time.sleep(0.1)
         start_point = (self._ego_state.x, self._ego_state.y, self._ego_state.heading_angle)
-        end_point = (req.x, req.y, req.yaw)
+        end_point = (request.x, request.y, request.yaw)
         global_traj = self._global_planner.run_step(start_point, end_point)
         if global_traj == None:
             self.get_logger().error("Global planning: Failed")
-            return False
-        self.get_logger().info("Global planning: Success")
-        self._global_planner_pub.publish(global_traj.to_ros_msg())
-        self._lattice_planner.update(global_traj.get_waypoints())
-        local_planning_frequency = self.get_parameter("~local_planning_frequency").get_parameter_value().double_value
-        self._lattice_planner_timer = self.create_timer(1.0/local_planning_frequency, self._local_planning_timer_callback)
-        return True
+            response.success = False
+        else:
+            self.get_logger().info("Global planning: Success")
+            self._global_planner_pub.publish(global_traj.to_ros_msg())
+            self._lattice_planner.update(global_traj.get_waypoints())
+            local_planning_frequency = self.get_parameter("~local_planning_frequency").get_parameter_value().double_value
+            self._lattice_planner_timer = self.create_timer(1.0/local_planning_frequency, self._local_planning_timer_callback)
+            response.success = True
+        return response
     
     def _ego_state_callback(self, state_msg):
         self._ego_state = state_msg
