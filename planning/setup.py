@@ -15,6 +15,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch'))),
+        (os.path.join('share', package_name, 'maps'), glob(os.path.join('maps', '*.osm'))),
     ],
     zip_safe=True,
     maintainer='shaohang',
