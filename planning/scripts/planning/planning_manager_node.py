@@ -3,7 +3,8 @@
 import rclpy
 from rclpy.node import Node
 
-import rospkg
+from ament_index_python.packages import get_package_share_directory
+
 import os
 import numpy as np
 import time
@@ -17,18 +18,17 @@ from motion_predictor.constant_velocity_predictor import ConstVelPredictor
 from local_planner.lattice_planner import LatticePlanner
 
 from iss_msgs.msg import State, StateArray, ObjectDetection3DArray
-from iss_msgs.srv import SetGoal, SetGoalResponse
+from iss_msgs.srv import SetGoal
 
 class PlanningManagerNode(Node):
     def __init__(self) -> None:
-        super().__init__("planning_manager_node", anonymous=True)
-        self._ego_state_sub = self.create_subscription(State, "carla_bridge/gt_state", self._ego_state_callback)
-        self._obstacle_sub = self.create_subscription(ObjectDetection3DArray, "carla_bridge/gt_object_detection", self._obstacle_callback)
+        super().__init__("planning_manager_node")
+        self._ego_state_sub = self.create_subscription(State, "carla_bridge/gt_state", self._ego_state_callback, 100)
+        self._obstacle_sub = self.create_subscription(ObjectDetection3DArray, "carla_bridge/gt_object_detection", self._obstacle_callback, 100)
         self._ego_state = None
         
         # Global planner 
-        rospack = rospkg.RosPack()
-        lanelet2_town06 = os.path.join(rospack.get_path('planning'), "maps", "Town06_hy.osm")
+        lanelet2_town06 = os.path.join(get_package_share_directory('planning'), "maps", "Town06_hy.osm")
         projector = UtmProjector(lanelet2.io.Origin(0., 0.))
         loadedMap, load_errors = lanelet2.io.loadRobust(lanelet2_town06, projector)
         traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
@@ -73,8 +73,8 @@ class PlanningManagerNode(Node):
         lattice_settings['K_LON'] = 0.8
         self._lattice_planner = LatticePlanner(loadedMap, traffic_rules, lattice_settings, solid_checker)
         
-        self._global_planner_pub = self.create_publisher(StateArray, "planning/lanelet2_planner/trajectory", queue_size=1, latch=True)
-        self._local_planner_pub = self.create_publisher(StateArray, "planning/lattice_planner/trajectory", queue_size=1)
+        self._global_planner_pub = self.create_publisher(StateArray, "planning/lanelet2_planner/trajectory", 1)
+        self._local_planner_pub = self.create_publisher(StateArray, "planning/lattice_planner/trajectory", 1)
         self._set_goal_srv = self.create_service(SetGoal, "planning/set_goal", self._set_goal_srv_callback)
     
     def _set_goal_srv_callback(self, req):
@@ -85,13 +85,13 @@ class PlanningManagerNode(Node):
         global_traj = self._global_planner.run_step(start_point, end_point)
         if global_traj == None:
             self.get_logger().error("Global planning: Failed")
-            return SetGoalResponse(False)
+            return False
         self.get_logger().info("Global planning: Success")
         self._global_planner_pub.publish(global_traj.to_ros_msg())
         self._lattice_planner.update(global_traj.get_waypoints())
         local_planning_frequency = self.get_parameter("~local_planning_frequency").get_parameter_value().double_value
         self._lattice_planner_timer = self.create_timer(1.0/local_planning_frequency, self._local_planning_timer_callback)
-        return SetGoalResponse(True)
+        return True
     
     def _ego_state_callback(self, state_msg):
         self._ego_state = state_msg
@@ -109,7 +109,10 @@ class PlanningManagerNode(Node):
             self._lattice_planner_timer.shutdown()
             self.get_logger().info("Goal reached!")
 
-if __name__ == "__main__":
+def main():
     rclpy.init()
     planning_manager_node = PlanningManagerNode()
     rclpy.spin(planning_manager_node)
+
+if __name__ == "__main__":
+    main()

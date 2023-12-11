@@ -1,13 +1,13 @@
 import os
 from glob import glob
-from setuptools import setup
+from setuptools import setup, find_packages
 
 package_name = 'planning'
 
 setup(
     name=package_name,
     version='0.0.0',
-    packages=['global_planner', 'local_planner', 'planning_utils', 'motion_predictor'],
+    packages=find_packages(exclude=['test']),
     package_dir={'': 'scripts'},
     install_requires=['setuptools'],
     data_files=[
@@ -24,7 +24,7 @@ setup(
     license='TODO',
     entry_points={
         'console_scripts': [
-            "planning_manager_node = planning.planning_manager_node",
+            "planning_manager_node = planning.planning_manager_node:main",
         ],
     },
 )
