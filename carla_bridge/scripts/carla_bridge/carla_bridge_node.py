@@ -30,14 +30,14 @@ class CARLABridgeNode(Node):
         client.load_world(map_name)
 
         self.params =  {
-            "fixed_delta_seconds": self.get_parameter('~fixed_delta_seconds'),
-            "num_non_ego_vehicles": self.get_parameter('~num_non_ego_vehicles'),
-            "graphic_rendering": self.get_parameter('~graphic_rendering'),
-            "simulation_duration": self.get_parameter('~simulation_duration'),
-            "simple_agent_demo": self.get_parameter('~simple_agent_demo'),
-            "ego_init": self.get_parameter('~ego_init'),
-            "ego_destination": self.get_parameter('~ego_destination'),
-            "agent_control_frequency": self.get_parameter('~agent_control_frequency'),
+            "fixed_delta_seconds": self.declare_parameter('~fixed_delta_seconds', 0.05).value,
+            "num_non_ego_vehicles": self.declare_parameter('~num_non_ego_vehicles', 50).value,
+            "graphic_rendering": self.declare_parameter('~graphic_rendering', True).value,
+            "simulation_duration": self.declare_parameter('~simulation_duration', 60).value,
+            "simple_agent_demo": self.declare_parameter('~simple_agent_demo', False).value,
+            "ego_init": self.declare_parameter('~ego_init', 1).value,
+            "ego_destination": self.declare_parameter('~ego_destination', 10).value,
+            "agent_control_frequency": self.declare_parameter('~agent_control_frequency', 10).value,
         }
         self._world = client.get_world()
         self._original_settings = self._world.get_settings()
