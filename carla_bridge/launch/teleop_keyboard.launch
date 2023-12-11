@@ -1,7 +1,7 @@
 <launch>
     
     <!-- Launch the teleop keyboard -->
-    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen">
+    <node pkg="teleop_twist_keyboard" exec="teleop_twist_keyboard" name="teleop_twist_keyboard" output="screen">
         <remap from="cmd_vel" to="/carla_bridge/cmd_vel" />
     </node>
 

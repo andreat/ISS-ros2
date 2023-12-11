@@ -58,7 +58,10 @@ class WPTTrackerNode(Node):
         self._pid_tracker.set_traj(self._trajectory.get_states())
         
 
-if __name__ == "__main__":
+def main():
     rclpy.init()
     wpt_tracker_node = WPTTrackerNode()
     rclpy.spin(wpt_tracker_node)
+
+if __name__ == "__main__":
+    main()

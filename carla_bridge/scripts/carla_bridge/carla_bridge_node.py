@@ -19,7 +19,7 @@ from carla_bridge.controller_bridge import ControllerBridge
 from iss_msgs.msg import ControlCommand
 
 class CARLABridgeNode(Node):
-    def __init__(self, world, traffic_manager):
+    def __init__(self):
         super().__init__("carla_bridge_node")
 
         carla_host = self.declare_parameter('~carla_host', 'localhost').value
@@ -141,8 +141,10 @@ class CARLABridgeNode(Node):
         self._world.tick()
         self._world.apply_settings(self._original_settings)
             
-
-if __name__ == "__main__":
+def main():
     rclpy.init()
     simulator = CARLABridgeNode()
     simulator.run()
+
+if __name__ == "__main__":
+    main()

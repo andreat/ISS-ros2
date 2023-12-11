@@ -9,6 +9,7 @@
 
   <depend>iss_msgs</depend>
   <depend>planning</depend>
+  <exec_depend>ros2launch</exec_depend> 
 
   <export>
     <build_type>ament_python</build_type>
