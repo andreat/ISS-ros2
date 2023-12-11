@@ -45,7 +45,7 @@ class GTObjectDetector:
             if actor.get_location().distance(ego_location) > self._MAX_DISTANCE:
                 continue
             detection = ObjectDetection3D()
-            detection.header.stamp = self._node.get_clock().now()
+            detection.header.stamp = self._node.get_clock().now().to_msg()
             detection.header.frame_id = "map"
             detection.id = actor.id
             detection.score = 1.0
