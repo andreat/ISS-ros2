@@ -14,7 +14,7 @@ class GTStateEstimator:
     
     def _timer_callback(self):
         state = State()
-        state.header.stamp = self._node.get_clock().now()
+        state.header.stamp = self._node.get_clock().now().to_msg()
         state.header.frame_id = "map"
         state.name = "ego_vehicle"
         carla_transform = self._vehicle.get_transform()
