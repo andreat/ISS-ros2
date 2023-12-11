@@ -33,7 +33,7 @@ class GTObjectDetector:
         self._world = world
         gt_object_detection_frequency = self._node.declare_parameter('~gt_object_detection_frequency', 10).value
         self._timer = self._node.create_timer(1 / gt_object_detection_frequency, self._timer_callback)
-        self._object_detection_pub = self._node.create_publisher(ObjectDetection3DArray, "carla_bridge/gt_object_detection", queue_size=1)
+        self._object_detection_pub = self._node.create_publisher(ObjectDetection3DArray, "carla_bridge/gt_object_detection", 1)
         self._MAX_DISTANCE = 20
         
     def _timer_callback(self, event):

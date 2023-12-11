@@ -11,12 +11,12 @@ class ControllerBridge:
     def __init__(self, node, vehicle) -> None:
         self._node = node
         self._vehicle = vehicle
-        self._tele_op_sub = self._node.create_subscriber(Twist, "/carla_bridge/cmd_vel", self._teleop_callback)
+        self._tele_op_sub = self._node.create_subscription(Twist, "/carla_bridge/cmd_vel", self._teleop_callback, 100)
         self._control = carla.VehicleControl()
         self._agent_sub = None
     
     def start_iss_agent(self, destination):
-        self._agent_sub = self._node.create_subscriber(ControlCommand, "control/control_command", self._agent_sub_callback)
+        self._agent_sub = self._node.create_subscription(ControlCommand, "control/control_command", self._agent_sub_callback, 100)
         self._call_set_goal_srv(destination)
     
     def _call_set_goal_srv(self, goal):

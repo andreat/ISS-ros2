@@ -8,7 +8,7 @@ class GTStateEstimator:
     def __init__(self, node, vehicle) -> None:
         self._node = node
         self._vehicle = vehicle
-        self._state_estimation_pub = self._node.create_publisher(State, "carla_bridge/gt_state", queue_size=1)
+        self._state_estimation_pub = self._node.create_publisher(State, "carla_bridge/gt_state", 1)
         gt_state_estimation_frequency = self._node.declare_parameter('~gt_state_estimation_frequency', 10).value
         self._timer = self._node.create_timer(1 / gt_state_estimation_frequency, self._timer_callback)
     
