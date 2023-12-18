@@ -30,7 +30,7 @@ bash <CARLA root>/CarlaUE4.sh -quality-level=Low -windowed
 ```
 - Try the simple agent build by CARLA team (in a new terminal):
 ```
-ros2 run carla_bridge carla_bridge.launch simple_agent_demo:=true
+ros2 launch carla_bridge carla_bridge.launch simple_agent_demo:=true
 ``` 
 - Try ISS agent ((in a new terminal)):
 ```
