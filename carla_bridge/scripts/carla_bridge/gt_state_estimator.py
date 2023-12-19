@@ -30,5 +30,6 @@ class GTStateEstimator:
         self._state_estimation_pub.publish(state)
     
     def shutdown(self):
-        self._timer.shutdown()
-        self._state_estimation_pub.unregister()
+        # self._timer.shutdown()
+        # self._state_estimation_pub.unregister()
+        pass

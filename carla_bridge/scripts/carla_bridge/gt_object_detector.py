@@ -53,6 +53,6 @@ class GTObjectDetector:
         self._object_detection_pub.publish(all_detections)
             
     def shutdown(self):
-        self._timer.shutdown()
-        self._object_detection_pub.unregister()
-            
+        # self._timer.shutdown()
+        # self._object_detection_pub.unregister()
+        pass

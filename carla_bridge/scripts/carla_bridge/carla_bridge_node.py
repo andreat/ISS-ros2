@@ -84,12 +84,12 @@ class CARLABridgeNode(Node):
         if self._step_cnt >= self._total_steps:
             self._gt_object_detector.shutdown()
             self._gt_state_estimator.shutdown()
-            self._carla_timer.shutdown()
-            self._agent_timer.shutdown() if self.params["simple_agent_demo"] else None
+            # self._carla_timer.shutdown()
+            # self._agent_timer.shutdown() if self.params["simple_agent_demo"] else None
             # self._progress_bar.close()
             self.destory()
             self._world.tick()
-            rclpy.shutdown("Simulation finished!")
+            rclpy.shutdown()
             
     def _add_ego_vehicle(self, spawn_point):
         blueprint_library = self._world.get_blueprint_library()
