@@ -91,7 +91,7 @@ class Trajectory:
             state_msg.steering_angle_velocity = self._states[i][7]
             trajectory_msg.states.append(state_msg)
         if self._time_step == None:
-            self._time_step = 0
+            self._time_step = 0.0
         trajectory_msg.duration = self._time_step * self._states.shape[0]
         return trajectory_msg
 
