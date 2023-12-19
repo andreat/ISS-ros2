@@ -92,7 +92,7 @@ class PlanningManagerNode(Node):
             self.get_logger().info("Global planning: Success")
             self._global_planner_pub.publish(global_traj.to_ros_msg())
             self._lattice_planner.update(global_traj.get_waypoints())
-            local_planning_frequency = self.get_parameter("~local_planning_frequency").get_parameter_value().double_value
+            local_planning_frequency = self.declare_parameter("local_planning_frequency", 1).value
             self._lattice_planner_timer = self.create_timer(1.0/local_planning_frequency, self._local_planning_timer_callback)
             response.success = True
         return response

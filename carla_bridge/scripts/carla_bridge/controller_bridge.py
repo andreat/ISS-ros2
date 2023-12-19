@@ -45,8 +45,8 @@ class ControllerBridge:
     def _teleop_callback(self, msg):
         throttle = msg.linear.x
         steering = msg.angular.z
-        scale_linear = self._node.declare_paramater("~scale_linear", 0.5).value
-        scale_angular = self._node.declare_parameter("~scale_angular", 0.5).value
+        scale_linear = self._node.declare_paramater("scale_linear", 0.5).value
+        scale_angular = self._node.declare_parameter("scale_angular", 0.5).value
         self._set_control(throttle * scale_linear, steering * scale_angular)
     
     def apply_control(self):

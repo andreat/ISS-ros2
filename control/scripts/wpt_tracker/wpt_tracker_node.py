@@ -12,7 +12,7 @@ import numpy as np
 class WPTTrackerNode(Node):
     def __init__(self) -> None:
         super().__init__("wpt_tracker_node")
-        ctrl_freq = self.declare_parameter("~control_frequency", 10).value
+        ctrl_freq = self.declare_parameter("control_frequency", 10).value
         self._timer = self.create_timer(1 / ctrl_freq, self._timer_callback)
         self._ctrl_pub = self.create_publisher(ControlCommand, "control/wpt_tracker/control_command", 1)
         self._ego_state_sub = self.create_subscription(State, "carla_bridge/gt_state", self._state_callback, 100)
