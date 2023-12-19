@@ -71,7 +71,7 @@ class CARLABridgeNode(Node):
             self._controller_bridge.start_simple_agent(self._spawn_points[self.params["ego_destination"]], self.params["agent_control_frequency"])
         else:
             self._controller_bridge.start_iss_agent(self._spawn_points[self.params["ego_destination"]])
-            self._carla_visualizer = CARLAVisualizer(self._world)
+            self._carla_visualizer = CARLAVisualizer(self)
         rclpy.spin(self)
     
         

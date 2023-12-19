@@ -10,9 +10,8 @@ color_map = {
 }
 
 class CARLAVisualizer:
-    def __init__(self, node, world) -> None:
+    def __init__(self, node) -> None:
         self._node = node
-        self._world = world
         self._global_planner_sub = self._node.create_subscription(StateArray, "planning/global_planner/trajectory", self._global_planner_callback, 100)
         self._local_planner_sub = self._node.create_subscription(StateArray, "planning/local_planner/trajectory", self._local_planner_callback, 100)
     
@@ -27,4 +26,4 @@ class CARLAVisualizer:
         # trajectory: StateArray
         for i, state in enumerate(msg.states):
             loc = carla.Location(x=state.x, y=-state.y, z=z)  # note: carla y is opposite to rviz y
-            self._world.debug.draw_string(loc, str(i), life_time=life_time, color=color)
+            self._node._world.debug.draw_string(loc, str(i), life_time=life_time, color=color)
