@@ -110,7 +110,7 @@ class PlanningManagerNode(Node):
             return
         self._local_planner_pub.publish(local_traj.to_ros_msg())
         if self._global_planner.is_goal_reached(self._ego_state):
-            self._lattice_planner_timer.shutdown()
+            # self._lattice_planner_timer.shutdown()
             self.get_logger().info("Goal reached!")
 
 def main():
