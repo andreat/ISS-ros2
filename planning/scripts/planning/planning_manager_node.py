@@ -2,7 +2,8 @@
 
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, QoSDurabilityPolicy
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -24,9 +25,10 @@ from iss_msgs.srv import SetGoal
 class PlanningManagerNode(Node):
     def __init__(self) -> None:
         super().__init__("planning_manager_node")
-        latching_qos = QoSProfile(depth=1, durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
-        self._ego_state_sub = self.create_subscription(State, "carla_bridge/gt_state", self._ego_state_callback, 100)
-        self._obstacle_sub = self.create_subscription(ObjectDetection3DArray, "carla_bridge/gt_object_detection", self._obstacle_callback, 100)
+        service_cb_group = MutuallyExclusiveCallbackGroup()
+        subscription_cb_group = MutuallyExclusiveCallbackGroup()
+        self._ego_state_sub = self.create_subscription(State, "carla_bridge/gt_state", self._ego_state_callback, 100, callback_group=subscription_cb_group)
+        self._obstacle_sub = self.create_subscription(ObjectDetection3DArray, "carla_bridge/gt_object_detection", self._obstacle_callback, 100, callback_group=subscription_cb_group)
         self._ego_state = None
         
         # Global planner 
@@ -75,9 +77,9 @@ class PlanningManagerNode(Node):
         lattice_settings['K_LON'] = 0.8
         self._lattice_planner = LatticePlanner(loadedMap, traffic_rules, lattice_settings, solid_checker)
         
-        self._global_planner_pub = self.create_publisher(StateArray, "planning/lanelet2_planner/trajectory", 1)
-        self._local_planner_pub = self.create_publisher(StateArray, "planning/lattice_planner/trajectory", 1)
-        self._set_goal_srv = self.create_service(SetGoal, "planning/set_goal", self._set_goal_srv_callback)
+        self._global_planner_pub = self.create_publisher(StateArray, "planning/lanelet2_planner/trajectory", 1, callback_group=subscription_cb_group)
+        self._local_planner_pub = self.create_publisher(StateArray, "planning/lattice_planner/trajectory", 1, callback_group=subscription_cb_group)
+        self._set_goal_srv = self.create_service(SetGoal, "planning/set_goal", self._set_goal_srv_callback, callback_group=service_cb_group)
     
     def _set_goal_srv_callback(self, request, response):
         while self._ego_state == None:
@@ -116,7 +118,9 @@ class PlanningManagerNode(Node):
 def main():
     rclpy.init()
     planning_manager_node = PlanningManagerNode()
-    rclpy.spin(planning_manager_node)
+    executor = MultiThreadedExecutor()
+    executor.add_node(planning_manager_node)
+    executor.spin()
 
 if __name__ == "__main__":
     main()
