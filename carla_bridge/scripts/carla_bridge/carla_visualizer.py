@@ -13,8 +13,8 @@ class CARLAVisualizer:
     def __init__(self, node, world) -> None:
         self._node = node
         self._world = world
-        self._global_planner_sub = self._node.get_subscriber(StateArray, "planning/global_planner/trajectory", self._global_planner_callback)
-        self._local_planner_sub = self._node.get_subscriber(StateArray, "planning/local_planner/trajectory", self._local_planner_callback)
+        self._global_planner_sub = self._node.create_subscription(StateArray, "planning/global_planner/trajectory", self._global_planner_callback, 100)
+        self._local_planner_sub = self._node.create_subscription(StateArray, "planning/local_planner/trajectory", self._local_planner_callback, 100)
     
     def _global_planner_callback(self, msg):
         life_time = self._node.get_parameter('~simulation_duration').get_value()
